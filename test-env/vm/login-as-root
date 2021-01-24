@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+set -e
+
+ssh root@localhost -p 2222 -l root -i vm-ssh-key
