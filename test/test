@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+set -e
+
+testDummy() {
+  assertEquals 1 1
+}
+
+testDummy2() {
+  assertEquals 1 2
+}
+
+. ../test-env/shunit2/shunit2
