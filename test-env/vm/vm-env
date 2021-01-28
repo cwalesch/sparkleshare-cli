@@ -1,0 +1,5 @@
+# forward ssh port (22) to port 2222 on host
+export QEMU_NET_OPTS="hostfwd=tcp::2222-:22"
+
+# headless mode
+export QEMU_OPTS="-display none"

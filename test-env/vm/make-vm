@@ -1,14 +1,9 @@
 #!/usr/bin/env bash
 set -e
 
+cd `dirname $0`
+
 rm -f vm-ssh-key vm-ssh-key.pub
 ssh-keygen -q -N '' -f vm-ssh-key
 
 nix-build '<nixpkgs/nixos>' -A vm -k -I nixos-config=./vm.nix
-
-# forward ssh port (22) to port 2222 on host
-export QEMU_NET_OPTS="hostfwd=tcp::2222-:22"
-export QEMU_OPTS="-display none"
-
-# run
-result/bin/run-nixos-vm

@@ -1,12 +1,29 @@
 #!/usr/bin/env bash
 set -e
 
+testenv=../test-env
+vm=$testenv/vm
+pid=0
+
+setUp() {
+  $vm/make-vm
+  . $vm/vm-env
+  $vm/result/bin/run-nixos-vm &
+  pid=$!
+
+  # TODO poll until up
+  sleep 10
+}
+
+tearDown() {
+  kill $pid
+}
+
 testDummy() {
-  assertEquals 1 1
+  # TODO do some work
+  echo "Running test on $pid..."
+
+  fail "test is incomplete"
 }
 
-testDummy2() {
-  assertEquals 1 2
-}
-
-. ../test-env/shunit2/shunit2
+. $testenv/shunit2/shunit2
