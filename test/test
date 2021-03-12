@@ -1,29 +1,41 @@
 #!/usr/bin/env bash
 set -e
 
-testenv=../test-env
+# FIXME `git clean -fX` necessary before running test
+
+# See https://github.com/kward/shunit2/
+
+dir=$(dirname $0)
+testenv=$dir/../test-env
 vm=$testenv/vm
 pid=0
 
+waitUntilVmUp() {
+  for i in $(seq 1 10); do
+    nc -z localhost 2222 2> /dev/null
+    if [ $? -eq 0 ]; then break; fi
+    if [ $i -eq 10 ]; then fail "vm not up after 10 seconds"; fi
+    sleep 1
+  done
+}
+
 setUp() {
   $vm/make-vm
-  . $vm/vm-env
+  source $vm/vm-env
   $vm/result/bin/run-nixos-vm &
   pid=$!
 
-  # TODO poll until up
-  sleep 10
+  waitUntilVmUp
 }
 
 tearDown() {
   kill $pid
 }
 
-testDummy() {
-  # TODO do some work
-  echo "Running test on $pid..."
+testSSH() {
+  actual=$(ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null localhost -p 2222 -l root -i $vm/vm-ssh-key 'echo hello')
 
-  fail "test is incomplete"
+  assertEquals "hello" "$actual"
 }
 
 . $testenv/shunit2/shunit2
