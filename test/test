@@ -1,8 +1,6 @@
 #!/usr/bin/env bash
 set -e
 
-# FIXME `git clean -fX` necessary before running test
-
 # See https://github.com/kward/shunit2/
 
 dir=$(dirname $0)
@@ -20,10 +18,17 @@ waitUntilVmUp() {
 }
 
 setUp() {
-  $vm/make-vm
-  source $vm/vm-env
-  $vm/result/bin/run-nixos-vm &
+  pushd $vm > /dev/null
+
+  # we must throw away the old vm as it's state is most likely dirty
+  # we should optimize this later, i.e. by snapshotting the vm
+  rm -f nixos.qcow2
+
+  ./make-vm
+  source vm-env
+  result/bin/run-nixos-vm &
   pid=$!
+  popd > /dev/null
 
   waitUntilVmUp
 }
