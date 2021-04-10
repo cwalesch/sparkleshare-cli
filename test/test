@@ -3,40 +3,14 @@ set -e
 
 # See https://github.com/kward/shunit2/
 
-dir=$(dirname $0)
-testenv=$dir/../test-env
-vm=$testenv/vm
-pid=0
-
-ssh="ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null localhost -p 2222 -l root -i $vm/vm-ssh-key"
-
-waitUntilVmUp() {
-  for i in $(seq 1 10); do
-    nc -z localhost 2222 2> /dev/null
-    if [ $? -eq 0 ]; then break; fi
-    if [ $i -eq 10 ]; then fail "vm not up after 10 seconds"; fi
-    sleep 1
-  done
-}
+source $(dirname $0)/env
 
 setUp() {
-  pushd $vm > /dev/null
-
-  # we must throw away the old vm as it's state is most likely dirty
-  # we should optimize this later, i.e. by snapshotting the vm
-  rm -f nixos.qcow2
-
-  ./make-vm
-  source vm-env
-  result/bin/run-nixos-vm &
-  pid=$!
-  popd > /dev/null
-
-  waitUntilVmUp
+  startVm
 }
 
 tearDown() {
-  kill $pid
+  stopVm
 }
 
 testSSH() {
@@ -52,10 +26,6 @@ testDazzle() {
 testDazzleSetup() {
   actual=$($ssh 'dazzle setup')
   assertContains "$actual" "Setup complete!"
-}
-
-_testInteractive() {
-  ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null localhost -p 2222 -l root -i $vm/vm-ssh-key
 }
 
 . $testenv/shunit2/shunit2
