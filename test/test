@@ -43,4 +43,14 @@ testSSH() {
   assertEquals "hello" "$actual"
 }
 
+testDazzle() {
+  actual=$(ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null localhost -p 2222 -l root -i $vm/vm-ssh-key 'dazzle')
+
+  assertContains "$actual" "Usage: dazzle "
+}
+
+_testInteractive() {
+  ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null localhost -p 2222 -l root -i $vm/vm-ssh-key
+}
+
 . $testenv/shunit2/shunit2
