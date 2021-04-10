@@ -8,6 +8,8 @@ testenv=$dir/../test-env
 vm=$testenv/vm
 pid=0
 
+ssh="ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null localhost -p 2222 -l root -i $vm/vm-ssh-key"
+
 waitUntilVmUp() {
   for i in $(seq 1 10); do
     nc -z localhost 2222 2> /dev/null
@@ -38,15 +40,18 @@ tearDown() {
 }
 
 testSSH() {
-  actual=$(ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null localhost -p 2222 -l root -i $vm/vm-ssh-key 'echo hello')
-
+  actual=$($ssh 'echo hello')
   assertEquals "hello" "$actual"
 }
 
 testDazzle() {
-  actual=$(ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null localhost -p 2222 -l root -i $vm/vm-ssh-key 'dazzle')
-
+  actual=$($ssh 'dazzle')
   assertContains "$actual" "Usage: dazzle "
+}
+
+testDazzleSetup() {
+  actual=$($ssh 'dazzle setup')
+  assertContains "$actual" "Setup complete!"
 }
 
 _testInteractive() {

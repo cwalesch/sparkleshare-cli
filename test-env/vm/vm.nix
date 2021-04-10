@@ -1,6 +1,8 @@
+{ config, pkgs, ... }:
 {
   environment.systemPackages = [
     (import ./dazzle.nix)
+    pkgs.git
   ];
 
   services.openssh.enable = true;
