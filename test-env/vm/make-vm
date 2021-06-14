@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+set -e
+
+cd `dirname $0`
+
+rm -f vm-ssh-key vm-ssh-key.pub
+ssh-keygen -q -N '' -f vm-ssh-key
+
+nix-build '<nixpkgs/nixos>' -A vm -k -I nixos-config=./vm.nix >> make-vm.log 2>&1
