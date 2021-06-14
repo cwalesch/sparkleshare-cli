@@ -5,6 +5,16 @@ set -e
 
 source $(dirname $0)/env
 
+tmpdir=''
+
+oneTimeSetUp() {
+  tmpdir=`mktemp -d`
+}
+
+oneTimeTearDown() {
+  rm -rf "$tmpdir"
+}
+
 setUp() {
   startVm
 }
@@ -26,6 +36,20 @@ testDazzle() {
 testDazzleSetup() {
   actual=$($ssh 'dazzle setup')
   assertContains "$actual" "Setup complete!"
+}
+
+testDazzleCreateAndLink() {
+  # given
+  $ssh "dazzle setup"
+
+  # when
+  $ssh "dazzle create foo"
+  cat $testenv/vm/vm-ssh-key.pub | $ssh "dazzle link"
+
+  # then
+  export GIT_SSH_COMMAND="ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i $vm/vm-ssh-key"
+  git clone ssh://storage@localhost:2222/home/storage/foo "$tmpdir"
+  test -d "$tmpdir/.git"
 }
 
 . $testenv/shunit2/shunit2
